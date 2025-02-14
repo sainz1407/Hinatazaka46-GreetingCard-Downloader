@@ -10,10 +10,24 @@ def get_html(url):
     response = urllib.request.urlopen(req)
     return response.read()
 
+def get_member_list():
+    search_url = "https://www.hinatazaka46.com/s/official/search/artist?ima=0000"
+    html = get_html(search_url)
+    res = bs(html, 'html.parser')
+    member_list = []
+    sorted_div = res.find('div', class_='sorted sort-default current')
+    if sorted_div:
+        member_items = sorted_div.find_all('li', class_='p-member__item')
+        for item in member_items:
+            data_member = item.get('data-member')
+            if data_member:
+                member_list.append(data_member)
+    return member_list
+
 def download_image(memName, src_link, savedir):
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    filename = os.path.join(savedir, memName + '.jpg')
+    filename = os.path.join(savedir, memNum + "." + memName + '.jpg')
     src_link = re.sub(r'/\d+_\d+_\d+\.jpg$', '.jpg', src_link)
     with open(filename, 'wb') as f:
         f.write(requests.get(src_link).content)
@@ -39,6 +53,6 @@ def process_member(memNum):
         download_image(memName, photo_src, "GreetingPHOTO")
     print(memName)
 
-memList = ["5", "7", "8", "9", "10", "11", "11", "12", "13", "14", "15", "16", "17", "18", "21", "22", "23", "24", "25", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"]
+memList = get_member_list()
 for memNum in memList:
     process_member(memNum)
